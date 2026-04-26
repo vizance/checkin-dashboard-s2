@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5 週復盤陪跑班 第二屆 - 打卡儀表板</title>
+    <meta name="description" content="5 週復盤習慣養成挑戰營 第二屆 打卡儀表板 - 35 天養成習慣，一起見證彼此的成長！查看打卡進度、連續打卡紀錄與排行榜。">
+    <meta property="og:title" content="5 週復盤陪跑班 第二屆 - 打卡儀表板">
+    <meta property="og:description" content="5 週復盤習慣養成挑戰營 - 35 天養成習慣，一起見證彼此的成長！">
+    <meta property="og:type" content="website">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700;900&family=Caveat:wght@700&display=swap"
+        rel="stylesheet">
+
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- 頂部標題 -->
+        <div class="header">
+            <h1> 🔥 5 週復盤習慣養成挑戰營 第二屆 </h1>
+            <p>35 天養成習慣，我們一起見證彼此的成長！<span class="header-partner-count"> 👥 <strong id="totalStudents">-</strong> 位夥伴同行 </span></p>
+        </div>
+
+        <!-- 每日打卡 CTA - 最重要的行動呼籲 -->
+        <div class="primary-cta-section">
+            <a href="https://forms.gle/AnUzSCAU6y9LkFVv6" target="_blank" class="checkin-cta-button">
+                <span class="cta-emoji"> ✅ </span>
+                <span class="cta-text"> 你今天打卡了嗎？點我立即打卡！</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- 次要資訊列：倒數計時 + 更新資訊 -->
+        <div class="secondary-info-bar">
+            <span class="info-item">
+                <span class="info-icon"> ⏰ </span>
+                <span class="info-label"> 今日倒數： </span>
+                <span class="info-value" id="countdownTimer">--:--:--</span>
+                <span class="info-timezone">(UTC+8)</span>
+            </span>
+            <span class="info-separator">·</span>
+            <span class="info-item">
+                <span class="info-icon"> 📊 </span>
+                <span class="info-label"> 資料自動更新於： </span>
+                <span class="info-value">08:00 / 14:00 / 23:00</span>
+            </span>
+            <button class="pill-refresh-button" id="globalRefreshBtn" onclick="globalRefreshData()">
+                <span class="refresh-icon">🔄</span>
+                <span class="refresh-text">手動刷新打卡資料</span>
+            </button>
+        </div>
+
+        <!-- 移除此處的今日打卡狀況，將整合到下方三欄佈局中 -->
+
+        <!-- 35 天挑戰進度 -->
+        <div class="heatmap-container">
+            <h2>35 天挑戰進度 </h2>
+
+            <!-- 進度資訊 -->
+            <div class="challenge-progress-info">
+                <div class="challenge-days">
+                    <span class="current-day"> 第 <span id="challengeCurrentDay">-</span> 天 </span>
+                    <span class="total-days">/ 35 天 </span>
+                </div>
+                <div class="challenge-progress-bar">
+                    <div class="challenge-progress-fill" id="challengeProgressFill" style="width: 0%"></div>
+                    <!-- 里程碑標記 -->
+                    <div class="milestone" style="left: 20%;" data-day="7" title="7 天萌芽 - 完成第一週的間歇式日記，開始培養習慣！">
+                        <div class="milestone-tooltip milestone-tooltip-achieved"> 🎉 太棒了！你已經堅持了一週！<br> 習慣的種子已經開始發芽 🌱
+                        </div>
+                        <div class="milestone-tooltip milestone-tooltip-locked"> ❓ 繼續加油，解鎖更多驚喜！</div>
+                        <span class="milestone-icon"> 🌱 </span>
+                        <span class="milestone-label">7</span>
+                    </div>
+                    <div class="milestone" style="left: 40%;" data-day="14" title="14 天成長 - 掌握了萃取法的基本技巧，開始能從經驗中提煉價值 ">
+                        <div class="milestone-tooltip milestone-tooltip-achieved"> 💪 兩週了！你正在成長！<br> 反思的力量已經在你身上展現 ✨ </div>
+                        <div class="milestone-tooltip milestone-tooltip-locked"> ❓ 繼續加油，解鎖更多驚喜！</div>
+                        <span class="milestone-icon"> 🌿 </span>
+                        <span class="milestone-label">14</span>
+                    </div>
+                    <div class="milestone" style="left: 60%;" data-day="21" title="21 天茁壯 - 習慣已經成型，反思能力顯著提升！">
+                        <div class="milestone-tooltip milestone-tooltip-achieved"> 🌟 三週了，真的很不簡單！<br> 你已經養成了一個終身受益的好習慣 🎯
+                        </div>
+                        <div class="milestone-tooltip milestone-tooltip-locked"> ❓ 繼續加油，解鎖更多驚喜！</div>
+                        <span class="milestone-icon"> 🌳 </span>
+                        <span class="milestone-label">21</span>
+                    </div>
+                    <div class="milestone" style="left: 80%;" data-day="28" title="28 天突破 - 建立了屬於自己的複盤系統，持續精進中 ">
+                        <div class="milestone-tooltip milestone-tooltip-achieved"> 🔥 四週了，你是真正的勇士！<br> 持續的力量會帶你走得更遠 🚀
+                        </div>
+                        <div class="milestone-tooltip milestone-tooltip-locked"> ❓ 繼續加油，解鎖更多驚喜！</div>
+                        <span class="milestone-icon"> 🏆 </span>
+                        <span class="milestone-label">28</span>
+                    </div>
+                    <div class="milestone milestone-final" style="left: 100%;" data-day="35"
+                        title="35 天完成 - 恭喜完成全程！你已經養成了終身受益的習慣 ">
+                        <div class="milestone-tooltip milestone-tooltip-achieved"> 🎊 恭喜完成 35 天挑戰！<br> 你做到了！這份堅持會改變你的人生 💎
+                        </div>
+                        <div class="milestone-tooltip milestone-tooltip-locked"> ❓ 堅持到底，見證蛻變時刻！</div>
+                        <span class="milestone-icon"> ⭐ </span>
+                        <span class="milestone-label">35</span>
+                    </div>
+                </div>
+                <div class="challenge-percentage" id="challengePercentage">0%</div>
+            </div>
+
+            <!-- 熱力圖 -->
+            <div id="heatmapGrid" class="heatmap-grid">
+                <!-- 熱力圖方格將由 JavaScript 動態生成 -->
+            </div>
+            <div class="heatmap-legend">
+                <span> 打卡率：</span>
+                <div class="heatmap-legend-item">
+                    <div class="heatmap-legend-color level-0"></div>
+                    <span>0-20%</span>
+                </div>
+                <div class="heatmap-legend-item">
+                    <div class="heatmap-legend-color level-1"></div>
+                    <span>21-40%</span>
+                </div>
+                <div class="heatmap-legend-item">
+                    <div class="heatmap-legend-color level-2"></div>
+                    <span>41-60%</span>
+                </div>
+                <div class="heatmap-legend-item">
+                    <div class="heatmap-legend-color level-3"></div>
+                    <span>61-80%</span>
+                </div>
+                <div class="heatmap-legend-item">
+                    <div class="heatmap-legend-color level-4"></div>
+                    <span>81-100%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tooltip for heatmap -->
+        <div id="heatmapTooltip" class="heatmap-tooltip"></div>
+
+        <!-- 個人進度快覽 - 新增 -->
+        <div class="personal-overview-section">
+            <h3 class="overview-title">
+                <span style="font-size: 24px;"> 👤 </span>
+                <span> 我的進度快覽 </span>
+            </h3>
+
+            <!-- 學員選擇 -->
+            <div class="overview-student-selector">
+                <label for="overviewStudentSelect" class="selector-label"> 你是誰？</label>
+                <select id="overviewStudentSelect" class="overview-student-select" onchange="updatePersonalOverview()">
+                    <option value=""> 請選擇你的名字 </option>
+                </select>
+            </div>
+
+            <!-- 選擇後顯示的區域 -->
+            <div id="overviewAfterSelect" style="display: none;">
+                <!-- 簡短摘要列 -->
+                <div class="overview-summary-line">
+                    <span class="summary-item">📅 累計 <strong id="overviewTotalDays">-</strong> 天</span>
+                    <span class="summary-separator">|</span>
+                    <span class="summary-item">🔥 最高連續 <strong id="overviewConsecutiveDays">-</strong> 天</span>
+                    <span class="summary-separator">|</span>
+                    <span class="summary-item" id="overviewMilestones">🎖️ 連續打卡里程碑 -</span>
+                </div>
+
+                <!-- 展開完整日曆按鈕 -->
+                <button class="view-detail-button" onclick="togglePersonalCalendar()">
+                    <span id="calendarToggleIcon">▼</span>
+                    <span id="calendarToggleText"> 展開我的完整打卡日曆 </span>
+                </button>
+
+                <!-- 完整日曆和記錄區域 - 預設收合 -->
+                <div id="personalCalendarContainer" style="display: none; margin-top: 20px;">
+                    <!-- 日曆和詳細記錄將由 JavaScript 動態生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 今日打卡戰況 - 折疊選單 -->
+        <div class="today-battle-section visual-tertiary">
+            <button class="section-toggle-button" onclick="toggleTodayBattleSection()">
+                <div class="toggle-header">
+                    <div class="toggle-title">
+                        <span style="font-size: 28px;"> 🔥 </span>
+                        <span style="margin-left: 10px;"> 今日打卡戰況 </span>
+                    </div>
+                    <div class="toggle-icon" id="todayBattleToggleIcon">▼</div>
+                </div>
+                <div class="toggle-subtitle">
+                    <span id="todayBattleSubtitle"> 今日已有 <strong id="todayCheckinsSummary">-</strong> 人打卡，打卡率 <strong id="todayRateSummary">-</strong>%</span>
+                </div>
+            </button>
+
+            <!-- 折疊內容區域 - 預設收合 -->
+            <div id="todayBattleContent" style="display: none; margin-top: 20px;">
+                <!-- 進度條 - 移到最上方 -->
+                <div class="progress-bar" style="margin-bottom: 20px;">
+                    <div class="progress-fill" id="todayProgress" style="width: 0%"></div>
+                </div>
+
+                <!-- 核心統計資訊 -->
+                <div class="battle-stats">
+                    <div class="battle-stat-item">
+                        <div class="battle-stat-label"> 打卡進度 </div>
+                        <div class="battle-stat-value">
+                            <span class="checkin-count" id="todayCheckins">-</span>
+                            <span class="checkin-separator">/</span>
+                            <span class="checkin-total" id="todayCheckinsTotal">-</span>
+                            <span class="checkin-unit"> 人 </span>
+                        </div>
+                    </div>
+                    <div class="battle-stat-item">
+                        <div class="battle-stat-label"> 打卡率 </div>
+                        <div class="battle-stat-value">
+                            <span class="checkin-rate" id="todayRateInline">-</span>
+                            <span class="checkin-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 已打卡 / 未打卡統計 -->
+                <div class="checkin-stats-row">
+                    <div class="checkin-stat-box checked">
+                        <div class="checkin-stat-label"> ✅ 已打卡 </div>
+                        <div class="checkin-stat-value" id="todayCheckedCount">-</div>
+                    </div>
+                    <div class="checkin-stat-box unchecked">
+                        <div class="checkin-stat-label"> ⏸️ 未打卡 </div>
+                        <div class="checkin-stat-value" id="todayUncheckedCount">-</div>
+                    </div>
+                </div>
+
+                <!-- 查看詳細名單並刷新按鈕 - 合併 -->
+                <button class="detail-toggle-button" onclick="toggleStudentListAndRefresh()">
+                    <span id="toggleIcon">▼</span>
+                    <span id="toggleText"> 查看詳細打卡名單（點擊自動刷新）</span>
+                </button>
+
+                <!-- 學員列表 - 可折疊 -->
+                <div id="studentAvatarsContainer" style="display: none; margin-top: 15px;">
+                    <h3 class="student-list-header checked-header">
+                        ✅ 已打卡 (<span id="checkedListCount">0</span>)
+                    </h3>
+                    <div class="student-avatars" id="checkedStudents"></div>
+
+                    <h3 class="student-list-header unchecked-header">
+                        ⏸️ 未打卡 (<span id="uncheckedListCount">0</span>)
+                    </h3>
+                    <div class="student-avatars" id="uncheckedStudents"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 看看其他復盤戰友 - 折疊選單 -->
+        <div class="teammates-section visual-tertiary">
+            <button class="section-toggle-button" onclick="toggleTeammatesSection()">
+                <div class="toggle-header">
+                    <div class="toggle-title">
+                        <span style="font-size: 28px;"> 👥 </span>
+                        <span style="margin-left: 10px;"> 看看其他復盤戰友 </span>
+                    </div>
+                    <div class="toggle-icon" id="teammatesToggleIcon">▼</div>
+                </div>
+                <div class="toggle-subtitle"> 查看戰友們的打卡排行與今日亮點分享 </div>
+            </button>
+
+            <!-- 折疊內容區域 - 預設收合 -->
+            <div id="teammatesContent" style="display: none; margin-top: 20px;">
+                <!-- 雙欄佈局 -->
+                <div class="two-column-layout">
+                    <!-- 連續打卡旅程榜 -->
+                    <div class="leaderboard visual-secondary">
+                        <div class="section-header-with-link">
+                            <h2>
+                                <span class="section-icon"> 🏆 </span>
+                                <span class="section-title"> 連續打卡旅程榜 </span>
+                            </h2>
+                            <a id="statsSheetLink" target="_blank" class="header-link">
+                                📊 查看完整旅程
+                            </a>
+                        </div>
+                        <div id="leaderboardList" class="loading"> 載入中 </div>
+                    </div>
+
+                    <!-- 每日亮點牆 -->
+                    <div class="highlights visual-secondary">
+                        <div class="section-header-with-link">
+                            <h2>
+                                <span class="section-icon"> 💡 </span>
+                                <span class="section-title"> 今日亮點精選 </span>
+                            </h2>
+                            <a id="highlightsSheetLink" target="_blank" class="header-link">
+                                📝 歷史記錄
+                            </a>
+                        </div>
+                        <div id="highlightsList" class="loading"> 載入中 </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Script -->
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
