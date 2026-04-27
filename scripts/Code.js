@@ -77,12 +77,13 @@ function setupStatsFormulas() {
   const numRows = lastRow - 1;
 
   // B欄：累計打卡天數
+  // 用 "*-"&A2 做後綴匹配：Form 顯示「12-Zarah Hsu」，學員名單存「Zarah Hsu」也能對上
   statsSheet.getRange(2, 2, numRows, 1).setFormula(
-    '=COUNTIFS(表單回應!$C:$C, A2, 表單回應!$E:$E, "Yes！我已完成")'
+    '=COUNTIFS(表單回應!$C:$C, "*-"&A2, 表單回應!$E:$E, "Yes！我已完成")'
   );
-  // D欄：最近打卡日期（已修正：移除 表單回應 前後多餘空格）
+  // D欄：最近打卡日期
   statsSheet.getRange(2, 4, numRows, 1).setFormula(
-    '=LET(result, MAXIFS(表單回應!$D:$D, 表單回應!$C:$C, A2, 表單回應!$E:$E, "Yes！我已完成"), IF(result=0, "", result))'
+    '=LET(result, MAXIFS(表單回應!$D:$D, 表單回應!$C:$C, "*-"&A2, 表單回應!$E:$E, "Yes！我已完成"), IF(result=0, "", result))'
   );
   // E~I 欄：里程碑
   statsSheet.getRange(2, 5, numRows, 1).setFormula('=IF(C2>=7, "🏆", "-")');
@@ -141,7 +142,8 @@ function updateAllConsecutiveDays() {
   let filteredCount = 0;
   for (let i = 1; i < responseData.length; i++) {
     const row = responseData[i];
-    const name = row[2];      // C欄：姓名
+    // C欄姓名：Form 會帶「編號-姓名」前綴（例如 12-Zarah Hsu），自動拆掉前綴
+    const name = String(row[2]).replace(/^\d+-/, '');
     const dateValue = row[3]; // D欄：打卡日期
     const status = row[4];    // E欄：完成狀態
 
