@@ -6,7 +6,7 @@
 // Google Sheets 配置（第二屆）
 export const SHEET_ID = '1wpqnvCdTDG6r0P8i5fSg8iDtu2AkHcflrU0Z1bJ90-0';
 export const STATS_GID = '1618258511';
-export const HIGHLIGHTS_GID = '1026882229';  // 表單回應工作表（第二屆 Form 連結後新建）
+export const HIGHLIGHTS_GID = '1756619067';  // 表單回應工作表（精簡版：移除 Email/是否完成/戰友後重建）
 
 // CSV 匯出 URL
 export const STATS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${STATS_GID}`;

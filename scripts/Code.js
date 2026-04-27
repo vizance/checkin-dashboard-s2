@@ -1,11 +1,14 @@
 /**
- * 5週復盤陪跑班 第二屆 - 打卡系統 Apps Script
+ * 5週復盤陪跑班 第二屆 - 打卡系統 Apps Script（精簡版表單）
  *
- * 修正內容（vs 第一屆）：
- * 1. 工作表名稱統一為無空格版本（表單回應 / 學員名單 / 打卡統計 / 每日亮點牆）
- * 2. 「完成狀態」答案統一為 "Yes！我已完成"
- * 3. 修正 lastDateFormula 內 表單回應 前後的多餘空格
- * 4. updateAllConsecutiveDays 在工作表找不到時會跳出明確錯誤訊息
+ * 第二屆精簡版表單欄位：
+ *   A=時間戳記 / B=姓名（含「編號-」前綴）/ C=打卡日期 / D=萃取法 / E=亮點 / F=文章
+ *
+ * 與第一屆差異：
+ * 1. 工作表名稱無空格（表單回應 / 學員名單 / 打卡統計 / 每日亮點牆）
+ * 2. 移除「Email / 是否完成 / 戰友 / 問題」欄位 → 送出表單即視為完成
+ * 3. 公式從 COUNTIFS（含狀態過濾）簡化為 COUNTIF
+ * 4. 姓名加 "*-"&A2 後綴匹配，處理 Form 顯示「編號-姓名」格式
  */
 
 const TEST_TODAY_DATE = null;
@@ -76,14 +79,17 @@ function setupStatsFormulas() {
   }
   const numRows = lastRow - 1;
 
-  // B欄：累計打卡天數
+  // 第二屆精簡版表單欄位：A=時間戳記, B=姓名, C=打卡日期, D=萃取法, E=亮點, F=文章
+  // 已移除「是否完成」欄位 → 送出 = 完成，公式不再需要狀態過濾
   // 用 "*-"&A2 做後綴匹配：Form 顯示「12-Zarah Hsu」，學員名單存「Zarah Hsu」也能對上
+
+  // B欄：累計打卡天數（單純計數姓名出現次數）
   statsSheet.getRange(2, 2, numRows, 1).setFormula(
-    '=COUNTIFS(表單回應!$C:$C, "*-"&A2, 表單回應!$E:$E, "Yes！我已完成")'
+    '=COUNTIF(表單回應!$B:$B, "*-"&A2)'
   );
-  // D欄：最近打卡日期
+  // D欄：最近打卡日期（從 C 欄取最大日期）
   statsSheet.getRange(2, 4, numRows, 1).setFormula(
-    '=LET(result, MAXIFS(表單回應!$D:$D, 表單回應!$C:$C, "*-"&A2, 表單回應!$E:$E, "Yes！我已完成"), IF(result=0, "", result))'
+    '=LET(result, MAXIFS(表單回應!$C:$C, 表單回應!$B:$B, "*-"&A2), IF(result=0, "", result))'
   );
   // E~I 欄：里程碑
   statsSheet.getRange(2, 5, numRows, 1).setFormula('=IF(C2>=7, "🏆", "-")');
@@ -142,12 +148,13 @@ function updateAllConsecutiveDays() {
   let filteredCount = 0;
   for (let i = 1; i < responseData.length; i++) {
     const row = responseData[i];
-    // C欄姓名：Form 會帶「編號-姓名」前綴（例如 12-Zarah Hsu），自動拆掉前綴
-    const name = String(row[2]).replace(/^\d+-/, '');
-    const dateValue = row[3]; // D欄：打卡日期
-    const status = row[4];    // E欄：完成狀態
+    // 第二屆精簡版表單欄位：A=時間戳記, B=姓名, C=打卡日期, D=萃取法, E=亮點, F=文章
+    // 姓名帶「編號-」前綴（例如 12-Zarah Hsu），自動拆掉
+    const name = String(row[1]).replace(/^\d+-/, '');
+    const dateValue = row[2]; // C欄：打卡日期
 
-    if (status === "Yes！我已完成") {
+    // 已移除「是否完成」欄位 → 送出表單就視為完成
+    if (name) {
       if (!studentRecords.has(name)) studentRecords.set(name, new Set());
       let normalizedDate, dateObj;
 
