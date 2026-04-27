@@ -3,13 +3,10 @@
  * 包含所有系統配置常數
  */
 
-// Google Sheets 配置
-// ⚠️ TODO（第二屆）：學員名單齊了之後，建立第二屆專屬的 Google Sheet，
-// 並把以下三個 ID 換成第二屆的值。在那之前先暫用第一屆的 ID 作為佔位（儀錶板會顯示第一屆資料）。
-// 切換步驟參考：第二屆_待辦清單.md
-export const SHEET_ID = 'TODO_REPLACE_WITH_S2_SHEET_ID';
-export const STATS_GID = 'TODO_REPLACE_WITH_S2_STATS_GID';
-export const HIGHLIGHTS_GID = 'TODO_REPLACE_WITH_S2_HIGHLIGHTS_GID';
+// Google Sheets 配置（第二屆）
+export const SHEET_ID = '1wpqnvCdTDG6r0P8i5fSg8iDtu2AkHcflrU0Z1bJ90-0';
+export const STATS_GID = '1618258511';
+export const HIGHLIGHTS_GID = '365956972';  // 表單回應工作表
 
 // CSV 匯出 URL
 export const STATS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${STATS_GID}`;
