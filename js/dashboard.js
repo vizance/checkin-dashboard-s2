@@ -15,23 +15,31 @@ import {
     getTaiwanNow
 } from './config.js';
 
+// ============================================================================
+// 表單欄位規格表（單一來源 / Single Source of Truth）
+// 表單欄位順序若有調整，只需改這裡 + Apps Script Code.js 的對應常數。
+// ============================================================================
+const FORM_COLUMNS = {
+    TIMESTAMP: 0,     // A 欄 - 時間戳記（系統自動）
+    NAME: 1,          // B 欄 - 姓名（含「編號-」前綴）
+    CHECKIN_DATE: 2,  // C 欄 - 打卡日期
+    METHOD: 3,        // D 欄 - 萃取法
+    HIGHLIGHT: 4,     // E 欄 - 今日一句話亮點（選填）
+    ARTICLE: 5        // F 欄 - 今日這段寫的文章（選填）
+};
+
 // ============================================
 // 前端計算連續打卡天數（即時計算，不依賴後端）
 // ============================================
 
 /**
- * 檢查打卡狀態是否為「已完成」
- * 支援多種格式：「✅ 是，已完成」、「Yes！我已完成」等
- * @param {string} status - 狀態值
- * @returns {boolean} 是否已完成
+ * 從 Form 回應的姓名欄位拆掉「編號-」前綴
+ * Form 顯示「12-Zarah Hsu」（編號讓學員好找），dashboard 比對與顯示用乾淨姓名「Zarah Hsu」
+ * @param {string} rawName - Form 原始姓名值
+ * @returns {string} 去前綴後的姓名
  */
-function isCheckinCompleted(status) {
-    if (!status) return false;
-    const s = status.toLowerCase();
-    // 支援：「是」+「完成」、「yes」+「完成」、或包含 ✅
-    return (s.includes('是') && s.includes('完成')) ||
-           (s.includes('yes') && s.includes('完成')) ||
-           s.includes('✅');
+function getStudentName(rawName) {
+    return String(rawName || '').replace(/^\d+-/, '').trim();
 }
 
 // 快取計算結果
@@ -50,12 +58,9 @@ export function calculateAllConsecutiveDays() {
 
     // 遍歷所有打卡記錄，建立每位學員的打卡日期 Set
     highlightsData.forEach(highlight => {
-        const name = highlight[2];      // C: 姓名
-        const dateValue = highlight[3]; // D: 打卡日期
-        const status = highlight[4];    // E: 是否完成
+        const name = getStudentName(highlight[FORM_COLUMNS.NAME]);
+        const dateValue = highlight[FORM_COLUMNS.CHECKIN_DATE];
 
-        // 只計算「已完成」的記錄（支援多種格式）
-        if (!isCheckinCompleted(status)) return;
         if (!name || !dateValue) return;
 
         if (!studentRecords.has(name)) {
@@ -267,19 +272,10 @@ function getTodayCheckedStudents() {
     const checkedStudents = new Set();
 
     highlightsData.forEach((highlight, index) => {
-        // highlight[0] = A: 時間戳記
-        // highlight[1] = B: 電子郵件
-        // highlight[2] = C: 姓名
-        // highlight[3] = D: 打卡日期
-        // highlight[4] = E: 是否完成
+        if (!highlight[FORM_COLUMNS.CHECKIN_DATE] || !highlight[FORM_COLUMNS.NAME]) return;
 
-        if (!highlight[3] || !highlight[2]) return;
-
-        // 只計算「已完成」的記錄（支援多種格式）
-        if (!isCheckinCompleted(highlight[4])) return;
-
-        const originalDateStr = highlight[3];  // D: 打卡日期
-        const studentName = highlight[2];      // C: 姓名
+        const originalDateStr = highlight[FORM_COLUMNS.CHECKIN_DATE];
+        const studentName = getStudentName(highlight[FORM_COLUMNS.NAME]);
 
         // 處理 Google Sheets 的日期時間格式 (例如: "2026/1/9 下午 4:52:25")
         // 先提取空格前的日期部分
@@ -347,15 +343,11 @@ function getCheckinRateForDate(date) {
 
     // 統計該日期有多少人打卡（只計算「已完成」的記錄）
     highlightsData.forEach(highlight => {
-        // highlight[3] = D: 打卡日期
-        // highlight[4] = E: 是否完成
-        if (!highlight[3] || !highlight[4]) return;
-
-        // 只統計「已完成」的記錄（支援多種格式）
-        if (!isCheckinCompleted(highlight[4])) return;
+        const dateValue = highlight[FORM_COLUMNS.CHECKIN_DATE];
+        if (!dateValue) return;
 
         // 處理 Google Sheets 的日期時間格式
-        const dateOnly = highlight[3].trim().split(' ')[0];
+        const dateOnly = dateValue.trim().split(' ')[0];
         let highlightDate = new Date(dateOnly);
 
         if (isNaN(highlightDate.getTime())) {
@@ -958,11 +950,10 @@ export function renderHighlights() {
 
     // 過濾出今天的亮點
     const todayHighlights = highlightsData.filter(highlight => {
-        if (!highlight[3]) return false;  // highlight[3] = D: 打卡日期
+        if (!highlight[FORM_COLUMNS.CHECKIN_DATE]) return false;
 
         // 處理 Google Sheets 的日期時間格式 (例如: "2026/1/9 下午 4:52:25")
-        // 先提取空格前的日期部分
-        const dateOnly = highlight[3].trim().split(' ')[0];
+        const dateOnly = highlight[FORM_COLUMNS.CHECKIN_DATE].trim().split(' ')[0];
 
         // 解析日期
         let highlightDate = new Date(dateOnly);
@@ -1006,20 +997,13 @@ export function renderHighlights() {
         `;
     } else {
         todayHighlights.forEach((highlight, index) => {
-            const timestamp = highlight[0];  // A: 時間戳記
-            const email = highlight[1];      // B: 電子郵件（不使用）
-            const name = highlight[2];       // C: 姓名
-            const dateStr = highlight[3];    // D: 打卡日期
-            const isCompleted = highlight[4]; // E: 是否完成（已由過濾處理）
-            const content = highlight[5];    // F: 今日一句話亮點
-            const method = highlight[6];     // G: 萃取法
-            const article = highlight[7];    // H: 今日撰寫的文章
-            const extra = highlight[8];      // I: 想對戰友說的話
-            // highlight[9] = J: 遭遇問題（目前未使用）
+            const name = getStudentName(highlight[FORM_COLUMNS.NAME]);
+            const dateStr = highlight[FORM_COLUMNS.CHECKIN_DATE];
+            const method = highlight[FORM_COLUMNS.METHOD];
+            const content = highlight[FORM_COLUMNS.HIGHLIGHT];
+            const article = highlight[FORM_COLUMNS.ARTICLE];
 
             const date = formatDate(dateStr);
-
-            // 生成文章區塊的 HTML
             const articleHTML = generateArticleHTML(article, index);
 
             html += `
@@ -1028,10 +1012,9 @@ export function renderHighlights() {
                         <div class="highlight-name">${name}</div>
                         <div class="highlight-date">${date}</div>
                     </div>
-                    <div class="highlight-content">💡 ${content}</div>
+                    ${content ? `<div class="highlight-content">💡 ${content}</div>` : ''}
                     ${method ? `<span class="highlight-method">${method}</span>` : ''}
                     ${articleHTML}
-                    ${extra ? `<div class="highlight-extra">💬 ${extra}</div>` : ''}
                 </div>
             `;
         });
@@ -1154,19 +1137,18 @@ window.updatePersonalOverview = function() {
     if (calendarContainer && calendarContainer.style.display === 'block') {
         console.log(`日曆已展開，自動更新為 ${studentName} 的日曆`);
 
-        // 重新生成日曆
-        const studentHighlights = highlightsData.filter(h => h[2] === studentName);
+        // 重新生成日曆（用 getStudentName 拆掉編號-前綴後比對）
+        const studentHighlights = highlightsData.filter(h => getStudentName(h[FORM_COLUMNS.NAME]) === studentName);
         const calendarHTML = generatePersonalCalendar(studentHighlights, COURSE_START_DATE);
 
         // 生成詳細記錄
         let highlightsHTML = '';
         if (studentHighlights.length > 0) {
             studentHighlights.forEach((highlight, index) => {
-                const dateStr = highlight[3];
-                const content = highlight[5];
-                const method = highlight[6];
-                const article = highlight[7];
-                const extra = highlight[8];
+                const dateStr = highlight[FORM_COLUMNS.CHECKIN_DATE];
+                const method = highlight[FORM_COLUMNS.METHOD];
+                const content = highlight[FORM_COLUMNS.HIGHLIGHT];
+                const article = highlight[FORM_COLUMNS.ARTICLE];
 
                 const date = formatDate(dateStr);
                 const articleHTML = generateArticleHTML(article, `overview-${index}`);
@@ -1176,10 +1158,9 @@ window.updatePersonalOverview = function() {
                         <div class="highlight-header">
                             <div class="highlight-date" style="font-size: 20px; color: #FF6B35; font-weight: 900;">📅 ${date}</div>
                         </div>
-                        <div class="highlight-content" style="font-size: 19px;">💡 ${content}</div>
+                        ${content ? `<div class="highlight-content" style="font-size: 19px;">💡 ${content}</div>` : ''}
                         ${method ? `<span class="highlight-method" style="font-size: 15px;">${method}</span>` : ''}
                         ${articleHTML}
-                        ${extra ? `<div class="highlight-extra" style="font-size: 16px;">💬 ${extra}</div>` : ''}
                     </div>
                 `;
             });
@@ -1229,18 +1210,17 @@ window.togglePersonalCalendar = function() {
 
     if (container.style.display === 'none' || !container.style.display) {
         // 展開：生成並顯示完整日曆
-        const studentHighlights = highlightsData.filter(h => h[2] === studentName);
+        const studentHighlights = highlightsData.filter(h => getStudentName(h[FORM_COLUMNS.NAME]) === studentName);
         const calendarHTML = generatePersonalCalendar(studentHighlights, COURSE_START_DATE);
 
         // 生成詳細記錄
         let highlightsHTML = '';
         if (studentHighlights.length > 0) {
             studentHighlights.forEach((highlight, index) => {
-                const dateStr = highlight[3];
-                const content = highlight[5];
-                const method = highlight[6];
-                const article = highlight[7];
-                const extra = highlight[8];
+                const dateStr = highlight[FORM_COLUMNS.CHECKIN_DATE];
+                const method = highlight[FORM_COLUMNS.METHOD];
+                const content = highlight[FORM_COLUMNS.HIGHLIGHT];
+                const article = highlight[FORM_COLUMNS.ARTICLE];
 
                 const date = formatDate(dateStr);
                 const articleHTML = generateArticleHTML(article, `overview-${index}`);
@@ -1250,10 +1230,9 @@ window.togglePersonalCalendar = function() {
                         <div class="highlight-header">
                             <div class="highlight-date" style="font-size: 20px; color: #FF6B35; font-weight: 900;">📅 ${date}</div>
                         </div>
-                        <div class="highlight-content" style="font-size: 19px;">💡 ${content}</div>
+                        ${content ? `<div class="highlight-content" style="font-size: 19px;">💡 ${content}</div>` : ''}
                         ${method ? `<span class="highlight-method" style="font-size: 15px;">${method}</span>` : ''}
                         ${articleHTML}
-                        ${extra ? `<div class="highlight-extra" style="font-size: 16px;">💬 ${extra}</div>` : ''}
                     </div>
                 `;
             });
@@ -1438,19 +1417,17 @@ function generatePersonalCalendar(studentHighlights, courseStartDate) {
     const parsedDates = []; // 用於 debug
 
     studentHighlights.forEach((h, index) => {
-        const isCompleted = h[4]; // E: 是否完成
-        const dateStr = h[3]; // D: 打卡日期
+        const dateStr = h[FORM_COLUMNS.CHECKIN_DATE];
 
         if (index < 3) {
             console.log(`記錄 ${index + 1}:`, {
-                姓名: h[2],
+                姓名: getStudentName(h[FORM_COLUMNS.NAME]),
                 打卡日期原始值: dateStr,
-                是否完成: isCompleted,
                 日期類型: typeof dateStr
             });
         }
 
-        if (isCheckinCompleted(isCompleted)) {
+        if (dateStr) {
             let date;
             let parseMethod = '';
 
@@ -1716,28 +1693,20 @@ export function lookupStudent() {
     const lastDate = student[3];
     const milestones = getMilestones(student);
 
-    // 從 highlightsData 過濾該學員的所有打卡記錄
-    const studentHighlights = highlightsData.filter(h => h[2] === studentName);  // h[2] = C: 姓名
+    // 從 highlightsData 過濾該學員的所有打卡記錄（用 getStudentName 拆掉編號-前綴後比對）
+    const studentHighlights = highlightsData.filter(h => getStudentName(h[FORM_COLUMNS.NAME]) === studentName);
 
     console.log(`${studentName} 的打卡記錄: ${studentHighlights.length} 筆`);
 
     let highlightsHTML = '';
     if (studentHighlights.length > 0) {
         studentHighlights.forEach((highlight, index) => {
-            const timestamp = highlight[0];  // A: 時間戳記
-            const email = highlight[1];      // B: 電子郵件（不使用）
-            const name = highlight[2];       // C: 姓名
-            const dateStr = highlight[3];    // D: 打卡日期
-            const isCompleted = highlight[4]; // E: 是否完成
-            const content = highlight[5];    // F: 今日一句話亮點
-            const method = highlight[6];     // G: 萃取法
-            const article = highlight[7];    // H: 今日撰寫的文章
-            const extra = highlight[8];      // I: 想對戰友說的話
-            // highlight[9] = J: 遭遇問題
+            const dateStr = highlight[FORM_COLUMNS.CHECKIN_DATE];
+            const method = highlight[FORM_COLUMNS.METHOD];
+            const content = highlight[FORM_COLUMNS.HIGHLIGHT];
+            const article = highlight[FORM_COLUMNS.ARTICLE];
 
             const date = formatDate(dateStr);
-
-            // 生成文章區塊的 HTML
             const articleHTML = generateArticleHTML(article, `lookup-${index}`);
 
             highlightsHTML += `
@@ -1745,10 +1714,9 @@ export function lookupStudent() {
                     <div class="highlight-header">
                         <div class="highlight-date" style="font-size: 20px; color: #FF6B35; font-weight: 900;">📅 ${date}</div>
                     </div>
-                    <div class="highlight-content" style="font-size: 19px;">💡 ${content}</div>
+                    ${content ? `<div class="highlight-content" style="font-size: 19px;">💡 ${content}</div>` : ''}
                     ${method ? `<span class="highlight-method" style="font-size: 15px;">${method}</span>` : ''}
                     ${articleHTML}
-                    ${extra ? `<div class="highlight-extra" style="font-size: 16px;">💬 ${extra}</div>` : ''}
                 </div>
             `;
         });

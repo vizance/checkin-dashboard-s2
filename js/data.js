@@ -26,33 +26,6 @@ import {
 } from './dashboard.js';
 
 /**
- * 第二屆 表單回應 欄位 → 第一屆舊欄位順序的轉接器
- *
- * 第二屆新欄位（移除 Email + 是否完成 + 戰友 + 問題；萃取法移到第 3 題）：
- *   [0] 時間戳記 / [1] 姓名 / [2] 打卡日期 / [3] 萃取法 / [4] 一句話亮點 / [5] 文章
- *
- * dashboard.js 仍按第一屆舊欄位寫死索引，這個函式把每筆資料 remap 回舊位置：
- *   [0] 時間戳記 / [1] (Email 留空) / [2] 姓名（去掉編號-前綴）/ [3] 日期
- *   [4] 是否完成（固定填 'Yes！我已完成' 讓舊邏輯通過）/ [5] 亮點 / [6] 萃取法
- *   [7] 文章 / [8] (戰友留空) / [9] (問題留空)
- */
-function remapHighlightRow(raw) {
-    if (!raw || raw.length === 0) return raw;
-    return [
-        raw[0] || '',                                          // 時間戳記
-        '',                                                     // (Email — 已移除)
-        String(raw[1] || '').replace(/^\d+-/, '').trim(),      // 姓名（去前綴）
-        raw[2] || '',                                          // 打卡日期
-        'Yes！我已完成',                                        // 是否完成（恆為已完成）
-        raw[4] || '',                                          // 一句話亮點
-        raw[3] || '',                                          // 萃取法
-        raw[5] || '',                                          // 文章
-        '',                                                     // (戰友 — 已移除)
-        ''                                                      // (問題 — 已移除)
-    ];
-}
-
-/**
  * CSV 解析函數
  * @param {string} csv - CSV 原始字串
  * @returns {Array<Array<string>>} 解析後的二維陣列
@@ -129,8 +102,7 @@ export async function loadData(useCache = true) {
         const highlightsCSV = await highlightsResponse.text();
 
         const newStatsData = parseCSV(statsCSV);
-        // 把第二屆的新欄位順序 remap 回舊順序，dashboard.js 才能繼續用既有索引
-        const newHighlightsData = parseCSV(highlightsCSV).map(remapHighlightRow);
+        const newHighlightsData = parseCSV(highlightsCSV);
 
         setStatsData(newStatsData);
         setHighlightsData(newHighlightsData);
