@@ -774,24 +774,24 @@ function startCooldown(button, seconds) {
 }
 
 // ============================================
-// 渲染連續打卡旅程榜（等級制）
+// 渲染打卡旅程榜（等級制，依累計天數）
 // ============================================
 
-// 等級定義
+// 等級定義（依累計打卡天數分級，斷掉一兩次也能繼續累積）
 const JOURNEY_TIERS = [
-    { emoji: '🏆', name: '完美旅程', min: 35, max: 999, description: '連續 35 天' },
-    { emoji: '🏔️', name: '登峰在望', min: 28, max: 34, description: '連續 28-34 天' },
-    { emoji: '🧗', name: '穩健攀登', min: 21, max: 27, description: '連續 21-27 天' },
-    { emoji: '🥾', name: '步履不停', min: 14, max: 20, description: '連續 14-20 天' },
-    { emoji: '🚶', name: '踏上旅途', min: 7, max: 13, description: '連續 7-13 天' },
-    { emoji: '🎒', name: '整裝待發', min: 1, max: 6, description: '連續 1-6 天' }
+    { emoji: '🏆', name: '完美旅程', min: 35, max: 999, description: '累計 35 天' },
+    { emoji: '🏔️', name: '登峰在望', min: 28, max: 34, description: '累計 28-34 天' },
+    { emoji: '🧗', name: '穩健攀登', min: 21, max: 27, description: '累計 21-27 天' },
+    { emoji: '🥾', name: '步履不停', min: 14, max: 20, description: '累計 14-20 天' },
+    { emoji: '🚶', name: '踏上旅途', min: 7, max: 13, description: '累計 7-13 天' },
+    { emoji: '🎒', name: '整裝待發', min: 1, max: 6, description: '累計 1-6 天' }
 ];
 
 export function renderLeaderboard() {
     const leaderboardList = document.getElementById('leaderboardList');
     leaderboardList.classList.remove('loading');
 
-    // 【前端即時計算】重新計算所有學員的連續打卡天數
+    // 【前端即時計算】重新計算所有學員的累計與連續打卡天數
     calculateAllConsecutiveDays();
 
     // 將學員依等級分組
@@ -800,16 +800,15 @@ export function renderLeaderboard() {
         students: []
     }));
 
-    // 遍歷所有學員，分配到對應等級
+    // 遍歷所有學員，分配到對應等級（依累計天數）
     statsData.forEach(student => {
         const name = student[0];
-        // 【改用前端計算結果】
-        const consecutiveDays = getConsecutiveDays(name);
+        const totalDays = getTotalDays(name);
 
         // 找到對應的等級
         for (const tierGroup of tierGroups) {
-            if (consecutiveDays >= tierGroup.min && consecutiveDays <= tierGroup.max) {
-                tierGroup.students.push({ name, days: consecutiveDays });
+            if (totalDays >= tierGroup.min && totalDays <= tierGroup.max) {
+                tierGroup.students.push({ name, days: totalDays });
                 break;
             }
         }

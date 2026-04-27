@@ -3013,6 +3013,29 @@
     font-size: 18px;
 }
 
+/* 主秀指標：累計天數放大、加粗 */
+.summary-item-primary {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2C3E50;
+}
+
+.summary-item-primary strong {
+    font-size: 24px;
+}
+
+/* 次要指標：連續、里程碑降級成小字 */
+.summary-item-secondary {
+    font-size: 13px;
+    color: #888;
+}
+
+.summary-item-secondary strong {
+    color: #999;
+    font-size: 14px;
+    font-weight: 600;
+}
+
 .summary-separator {
     color: #CCC;
 }
