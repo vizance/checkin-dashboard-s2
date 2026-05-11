@@ -401,9 +401,17 @@ export function renderHeatmap() {
     const daysPassed = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)) + 1;
     const progressPercentage = Math.round((daysPassed / 35) * 100);
 
-    document.getElementById('challengeCurrentDay').textContent = daysPassed;
-    document.getElementById('challengeProgressFill').style.width = progressPercentage + '%';
-    document.getElementById('challengePercentage').textContent = progressPercentage + '%';
+    const challengeDaysEl = document.querySelector('.challenge-days');
+    if (daysPassed < 1) {
+        const daysUntilStart = Math.ceil((COURSE_START_DATE - today) / (1000 * 60 * 60 * 24));
+        challengeDaysEl.innerHTML = `<span class="current-day">🌱 距離開營還有 <strong>${daysUntilStart}</strong> 天</span>`;
+        document.getElementById('challengeProgressFill').style.width = '0%';
+        document.getElementById('challengePercentage').textContent = '即將啟程';
+    } else {
+        challengeDaysEl.innerHTML = `<span class="current-day"> 第 <span id="challengeCurrentDay">${daysPassed}</span> 天 </span><span class="total-days">/ 35 天 </span>`;
+        document.getElementById('challengeProgressFill').style.width = progressPercentage + '%';
+        document.getElementById('challengePercentage').textContent = progressPercentage + '%';
+    }
 
     // 更新里程碑狀態
     const milestones = document.querySelectorAll('.milestone');
