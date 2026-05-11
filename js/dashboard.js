@@ -402,19 +402,21 @@ export function renderHeatmap() {
     const progressPercentage = Math.round((daysPassed / 35) * 100);
 
     const challengeDaysEl = document.querySelector('.challenge-days');
+    const percentageEl = document.getElementById('challengePercentage');
     if (daysPassed < 1) {
         const daysUntilStart = Math.ceil((COURSE_START_DATE - today) / (1000 * 60 * 60 * 24));
         challengeDaysEl.innerHTML = `<span class="current-day current-day-special">🌱 距離開營還有 <strong>${daysUntilStart}</strong> 天</span>`;
         document.getElementById('challengeProgressFill').style.width = '0%';
-        document.getElementById('challengePercentage').textContent = '即將啟程';
+        percentageEl.style.display = 'none';
     } else if (daysPassed > 35) {
         challengeDaysEl.innerHTML = `<span class="current-day current-day-special">🎊 35 天挑戰完成</span>`;
         document.getElementById('challengeProgressFill').style.width = '100%';
-        document.getElementById('challengePercentage').textContent = '已完成';
+        percentageEl.style.display = 'none';
     } else {
         challengeDaysEl.innerHTML = `<span class="current-day"> 第 <span id="challengeCurrentDay">${daysPassed}</span> 天 </span><span class="total-days">/ 35 天 </span>`;
         document.getElementById('challengeProgressFill').style.width = progressPercentage + '%';
-        document.getElementById('challengePercentage').textContent = progressPercentage + '%';
+        percentageEl.style.display = '';
+        percentageEl.textContent = progressPercentage + '%';
     }
 
     // 更新里程碑狀態
