@@ -4,7 +4,7 @@
  */
 
 import { loadData } from './data.js';
-import { SHEET_ID, STATS_GID, HIGHLIGHTS_GID } from './config.js';
+import { SHEET_ID, STATS_GID, HIGHLIGHTS_WALL_GID } from './config.js';
 
 /**
  * 設定 Google Sheet 連結
@@ -18,7 +18,7 @@ function setupSheetLinks() {
     }
 
     if (highlightsLink) {
-        highlightsLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${HIGHLIGHTS_GID}`;
+        highlightsLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${HIGHLIGHTS_WALL_GID}`;
     }
 }
 
