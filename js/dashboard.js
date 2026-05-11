@@ -404,9 +404,13 @@ export function renderHeatmap() {
     const challengeDaysEl = document.querySelector('.challenge-days');
     if (daysPassed < 1) {
         const daysUntilStart = Math.ceil((COURSE_START_DATE - today) / (1000 * 60 * 60 * 24));
-        challengeDaysEl.innerHTML = `<span class="current-day">🌱 距離開營還有 <strong>${daysUntilStart}</strong> 天</span>`;
+        challengeDaysEl.innerHTML = `<span class="current-day current-day-special">🌱 距離開營還有 <strong>${daysUntilStart}</strong> 天</span>`;
         document.getElementById('challengeProgressFill').style.width = '0%';
         document.getElementById('challengePercentage').textContent = '即將啟程';
+    } else if (daysPassed > 35) {
+        challengeDaysEl.innerHTML = `<span class="current-day current-day-special">🎊 35 天挑戰完成</span>`;
+        document.getElementById('challengeProgressFill').style.width = '100%';
+        document.getElementById('challengePercentage').textContent = '已完成';
     } else {
         challengeDaysEl.innerHTML = `<span class="current-day"> 第 <span id="challengeCurrentDay">${daysPassed}</span> 天 </span><span class="total-days">/ 35 天 </span>`;
         document.getElementById('challengeProgressFill').style.width = progressPercentage + '%';
