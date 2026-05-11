@@ -1213,13 +1213,14 @@
 
         .challenge-days .current-day-special {
             font-size: 22px;
+            line-height: 1.5;
             white-space: normal;
             text-align: center;
             color: #FF6B35;
         }
 
         .challenge-days .current-day-special strong {
-            font-size: 28px;
+            font-size: 24px;
         }
 
         .challenge-progress-bar {
@@ -2483,7 +2484,7 @@
             }
 
             .challenge-days .current-day-special strong {
-                font-size: 22px;
+                font-size: 20px;
             }
 
             .challenge-progress-bar {
